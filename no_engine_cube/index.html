@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Vanilla 3D Cube</title>
+    <style>
+        body { margin: 0; background: #1a1a1a; overflow: hidden; display: flex; justify-content: center; align-items: center; height: 100vh; }
+        canvas { border: 1px solid #444; background: #000; }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+
+<script>
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+canvas.width = 1600;
+canvas.height = 600;
+
+// Cube vertices and edges
+let points = [
+    {x: -1, y: -1, z: 1}, {x: 1, y: -1, z: 1}, {x: 1, y: 1, z: 1}, {x: -1, y: 1, z: 1},
+    {x: -1, y: -1, z: -1}, {x: 1, y: -1, z: -1}, {x: 1, y: 1, z: -1}, {x: -1, y: 1, z: -1}
+];
+const edges = [[0,1], [1,2], [2,3], [3,0], [4,5], [5,6], [6,7], [7,4], [0,4], [1,5], [2,6], [3,7]];
+
+// Interaction State
+let isDragging = false;
+let lastMouseX = 0;
+let lastMouseY = 0;
+let rotationX = 0.5; // Initial tilt
+let rotationY = 0.5;
+
+// Mouse Events
+canvas.addEventListener('mousedown', e => {
+    isDragging = true;
+    lastMouseX = e.clientX;
+    lastMouseY = e.clientY;
+});
+
+window.addEventListener('mouseup', () => isDragging = false);
+
+window.addEventListener('mousemove', e => {
+    if (isDragging) {
+        const deltaX = e.clientX - lastMouseX;
+        const deltaY = e.clientY - lastMouseY;
+
+        // Map mouse movement to rotation (0.01 is sensitivity)
+        rotationY += deltaX * 0.01;
+        rotationX += deltaY * 0.01;
+
+        lastMouseX = e.clientX;
+        lastMouseY = e.clientY;
+    }
+});
+
+function project(p) {
+    const perspective = 400 / (p.z + 4);
+    return {
+        x: p.x * perspective + canvas.width / 2,
+        y: p.y * perspective + canvas.height / 2
+    };
+}
+
+function rotate(p, ax, ay) {
+    // Rotate Y
+    let x = p.x * Math.cos(ay) - p.z * Math.sin(ay);
+    let z = p.x * Math.sin(ay) + p.z * Math.cos(ay);
+    // Rotate X
+    let y = p.y * Math.cos(ax) - z * Math.sin(ax);
+    z = p.y * Math.sin(ax) + z * Math.cos(ax);
+    return {x, y, z};
+}
+
+function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Subtle "friction" or auto-rotation could go here
+    // For now, it stays exactly where you drag it
+
+    const projectedPoints = points.map(p => {
+        const rotated = rotate(p, rotationX, rotationY);
+        return project(rotated);
+    });
+
+    ctx.strokeStyle = '#00ffcc';
+    ctx.lineWidth = 2;
+    ctx.lineJoin = 'round';
+
+    edges.forEach(edge => {
+        const p1 = projectedPoints[edge[0]];
+        const p2 = projectedPoints[edge[1]];
+        ctx.beginPath();
+        ctx.moveTo(p1.x, p1.y);
+        ctx.lineTo(p2.x, p2.y);
+        ctx.stroke();
+    });
+
+    requestAnimationFrame(draw);
+}
+
+draw();
+</script>
+</body>
+</html>
