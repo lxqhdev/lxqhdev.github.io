@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speedy Clicks - CPS Checker</title>
+    <style>
+        body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background-color: #f0f2f5; }
+        .container { text-align: center; background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 300px; }
+        #click-area { width: 100%; height: 200px; background-color: #007bff; color: white; border: none; border-radius: 8px; font-size: 1.5rem; cursor: pointer; transition: background 0.2s; margin: 1rem 0; }
+        #click-area:active { background-color: #0056b3; transform: scale(0.98); }
+        #click-area:disabled { background-color: #6c757d; cursor: not-allowed; }
+        .stats { display: flex; justify-content: space-around; font-weight: bold; font-size: 1.1rem; }
+        button#reset { background: none; border: 1px solid #007bff; color: #007bff; padding: 5px 15px; border-radius: 4px; cursor: pointer; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>CPS Checker</h2>
+    <div class="stats">
+        <div>Time: <span id="timer">5</span>s</div>
+        <div>CPS: <span id="cps">0</span></div>
+    </div>
+    <button id="click-area">Click to Start!</button>
+    <p>Total Clicks: <span id="score">0</span></p>
+    <button id="reset">Reset</button>
+</div>
+
+<script>
+    let clicks = 0;
+    let timeLeft = 5;
+    let timerStarted = false;
+    let interval;
+
+    const clickArea = document.getElementById('click-area');
+    const timerDisplay = document.getElementById('timer');
+    const scoreDisplay = document.getElementById('score');
+    const cpsDisplay = document.getElementById('cps');
+    const resetBtn = document.getElementById('reset');
+
+    function startTimer() {
+        interval = setInterval(() => {
+            timeLeft--;
+            timerDisplay.textContent = timeLeft;
+            if (timeLeft <= 0) {
+                endGame();
+            }
+        }, 1000);
+    }
+
+    function endGame() {
+        clearInterval(interval);
+        clickArea.disabled = true;
+        clickArea.textContent = "Time's Up!";
+        const finalCps = (clicks / 5).toFixed(2);
+        cpsDisplay.textContent = finalCps;
+    }
+
+    clickArea.addEventListener('click', () => {
+        if (!timerStarted) {
+            timerStarted = true;
+            startTimer();
+            clickArea.textContent = "CLICK!";
+        }
+        clicks++;
+        scoreDisplay.textContent = clicks;
+    });
+
+    resetBtn.addEventListener('click', () => {
+        clearInterval(interval);
+        clicks = 0;
+        timeLeft = 5;
+        timerStarted = false;
+        clickArea.disabled = false;
+        clickArea.textContent = "Click to Start!";
+        timerDisplay.textContent = timeLeft;
+        scoreDisplay.textContent = "0";
+        cpsDisplay.textContent = "0";
+    });
+</script>
+
+</body>
+</html>
